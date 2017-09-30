@@ -1,0 +1,63 @@
+#:kivy 1.10.0
+
+<container>:
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    rows: 3
+    cols: 1
+    GridLayout:
+        rows: 1
+        cols: 8
+        Label:
+            text: 'place 1'
+            color: 0, 0, 0, 1
+        Label:
+            text: 'place 2'
+            color: 0, 0, 0, 1
+        Label:
+            text: 'place 3'
+            color: 0, 0, 0, 1
+        Label:
+            text: 'place 4'
+            color: 0, 0, 0, 1
+        Label:
+            text: 'place 5'
+            color: 0, 0, 0, 1
+        Label:
+            text: 'place 6'
+            color: 0, 0, 0, 1
+        Label:
+            text: 'place 7'
+            color: 0, 0, 0, 1
+        Label:
+            text: 'place 8'
+            color: 0, 0, 0, 1
+    GridLayout:
+        rows: 1
+        cols: 2
+        Label:
+            id: L1
+            text: 'Blood Glucose Level'
+            color: 0, 0, 0, 1
+            size_hint_x: 0.3
+        Label:
+            id: b1
+            text: 'Text Display'
+            color: 0, 0, 0, 1
+    GridLayout:
+        rows: 1
+        cols: 3
+        Button:
+            text: 'Manual Button'
+            color: 0, 0, 0, 1
+        Label:
+            text: 'PLace 9'
+            color: 0, 0, 0, 1
+        Label:
+            text: 'Status etc.'
+            color: 0, 0, 0, 1
+
