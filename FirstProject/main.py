@@ -10,12 +10,23 @@ kv_path = './kv/'
 for kv in listdir(kv_path):
     Builder.load_file(kv_path+kv)
 
+colorIterator = 0
+
+
 class Container(GridLayout):
     def buttonPress(self):
-        insultList = ['Fuck You Brigitte', 'Brigitte is a monster', 'Brigitte the bed hog',
-                      'Brigitte is the best... jks']
+        global colorIterator
+        if colorIterator == 0:
+            self.ids.manualButton.background_color = (0.28, 0.97, 0.29, 1)
+            self.ids.manualButton.text = "ON"
+            colorIterator = 1
+        else:
+            self.ids.manualButton.background_color = (0.97, 0.27, 0.27, 1)
+            self.ids.manualButton.text = "OFF"
+            colorIterator = 0
 
-        self.ids.L1.text = insultList[randint(0, 3)]
+
+
 
 
 

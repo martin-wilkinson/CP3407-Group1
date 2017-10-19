@@ -1,6 +1,8 @@
 #:kivy 1.10.0
+#:import Window kivy.core.window.Window
 
 <container>:
+    some_property: setattr(Window, 'fullscreen' , 'auto')  or 'real_value!'
     canvas.before:
         Color:
             rgba: 1, 1, 1, 1
@@ -51,9 +53,23 @@
     GridLayout:
         rows: 1
         cols: 3
-        Button:
-            text: 'Manual Button'
-            color: 0, 0, 0, 1
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                size_hint: 1, 0.3
+                text: 'Manual Operation'
+                background_color: 0, 0, 0, 1
+                color: 0, 0, 0, 1
+                canvas.before:
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Button:
+                id: manualButton
+                text: 'OFF'
+                background_color: 0.97, 0.27, 0.27, 1
+                color: 1, 1, 1, 1
+                on_release: root.buttonPress()
         Label:
             text: 'PLace 9'
             color: 0, 0, 0, 1
