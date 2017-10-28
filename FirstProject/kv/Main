@@ -15,28 +15,36 @@
         rows: 1
         cols: 8
         Label:
-            text: 'place 1'
+            id: Battery
+            text: 'Battery'
             color: 0, 0, 0, 1
         Label:
-            text: 'place 2'
+            id: Sensor
+            text: 'Sensor'
             color: 0, 0, 0, 1
         Label:
-            text: 'place 3'
+            id: Pump
+            text: 'Pump'
             color: 0, 0, 0, 1
         Label:
-            text: 'place 4'
+            id: Delivery
+            text: 'Delivery'
             color: 0, 0, 0, 1
         Label:
-            text: 'place 5'
+            id: Needle
+            text: 'Needle'
             color: 0, 0, 0, 1
         Label:
-            text: 'place 6'
+            id: Reservoir
+            text: 'Reservoir'
             color: 0, 0, 0, 1
         Label:
-            text: 'place 7'
+            id: Insulin
+            text: 'Insulin'
             color: 0, 0, 0, 1
-        Label:
-            text: 'place 8'
+        Label
+            id: dispClock
+            text: self.parent.parent.time
             color: 0, 0, 0, 1
     GridLayout:
         rows: 1

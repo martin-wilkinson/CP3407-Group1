@@ -1,9 +1,14 @@
 from kivy.app import App
 from random import *
 from kivy.app import Widget
+from kivy.properties import StringProperty
 from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
 from kivy.lang import Builder
+from kivy.clock import Clock
+
+import time
+
 
 from os import listdir
 kv_path = './kv/'
@@ -14,6 +19,9 @@ colorIterator = 0
 
 
 class Container(GridLayout):
+
+    time = StringProperty("00:00")
+
     def buttonPress(self):
         global colorIterator
         if colorIterator == 0:
@@ -25,6 +33,17 @@ class Container(GridLayout):
             self.ids.manualButton.text = "OFF"
             colorIterator = 0
 
+    def update(self, *args):
+        self.time = time.strftime("%H : %M")
+        self.schedule_update()
+
+    def schedule_update(self):
+        current_time = time.localtime()
+        seconds = current_time[5]
+
+        secs_to_next_minute = 60 - seconds
+
+        Clock.schedule_once(self.update, secs_to_next_minute)
 
 
 
@@ -34,7 +53,10 @@ class Container(GridLayout):
 class MainApp(App):
     def build(self):
         self.title = 'Awesome app!!!'
-        return Container()
+        container = Container()
+        container.update()
+
+        return container
 
 if __name__ == "__main__":
     MainApp().run()
