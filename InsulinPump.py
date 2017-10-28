@@ -1,51 +1,52 @@
-class Pump:
-    current = 0
-    previous = 5
+from database import *
 
-    HIGH = 7
-    MID = 5
-    LOW = 3
 
-    def main(self):
-        pass
+current = 0
+previous = 5
+HIGH = 7
+LOW = 3
 
-    def getRate(self):
-        # I want this to get current reading from the server
-        pass
+def main():
+    print("Running startup Checks")
+    # startup checks here
+    getZone()
+    pass
 
-    def sugarLow(self):
-        pass
+def getReading(prewious, current):
+    # This will assign current to previous and then get a reading from DB to assign current
+    previous = current
+    current = pull_from_blood_sugar_table()
 
-    def calculate(self):
-        if self.getRate() > 0:                         # Checking if Sugar Level (SL) rising
-            if self.current > self.HIGH:
-                print('UNSAFE')
-            elif self.current > self.MID:
-                print('Safe, but high')
-            elif self.current > self.LOW:
-                print('Safe, but low')
-            elif self.current < self.LOW:
-                print('Not good ,eat!')
+def getRate():
+    rate = int(round((current - previous), 0))
+    return rate
 
-        elif self.getRate() < 0:                         # Checking if Sugar Level (SL) falling
-            if self.current > self.HIGH:
-                print('UNSAFE')
-            elif self.current > self.MID:
-                print('Safe, but high')
-            elif self.current > self.LOW:
-                print('Safe, but low')
-            elif self.current < self.LOW:
-                print('Not good ,eat!')
+def getZone():
+    if getRate() > 0:
+        if current > HIGH:
+            print('UNSAFE', getRate())
+        elif LOW <= current <= HIGH:
+            print('Safe')
+        elif current < LOW:
+            print("Your Blood Sugar Levels are low!")
 
-        elif self.getRate() == 0:
-            if self.current > self.HIGH:
-                print('UNSAFE')
-            elif self.current > self.MID:
-                print('Safe, but high')
-            elif self.current > self.LOW:
-                print('Safe, but low')
-            elif self.current < self.LOW:
-                print('Not good ,eat!')
+    elif getRate() < 0:
+        if current > HIGH:
+            print('UNSAFE')
+        elif LOW <= current <= HIGH:
+            print('Safe')
+        elif current < LOW:
+            print("Your Blood Sugar Levels are low!")
+
+    elif getRate() == 0:
+        if current > HIGH:
+            print('UNSAFE')
+        elif LOW <= current <= HIGH:
+            print('Safe')
+        elif current < LOW:
+            print("Your Blood Sugar Levels are low!")
+
+main()
 
 """
 Have calc call admin to administer insulin and take away from total + add to cumulative.
