@@ -1,6 +1,6 @@
-Index,Sensor,Pump,Delivery,Needle,Insulin,Sugar Level
+Index,Sensor,Pump,Delivery,Needle,Reservoir,Sugar Level
 1,TRUE,TRUE,TRUE,TRUE,TRUE,5
-2,TRUE,TRUE,TRUE,TRUE,TRUE,5
+2,TRUE,TRUE,TRUE,TRUE,TRUE,6
 3,TRUE,TRUE,TRUE,TRUE,TRUE,6
 4,TRUE,TRUE,TRUE,TRUE,TRUE,7
 5,TRUE,TRUE,TRUE,TRUE,TRUE,8
