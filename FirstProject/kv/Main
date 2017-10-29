@@ -14,29 +14,86 @@
     GridLayout:
         rows: 1
         cols: 8
-        Label:
-            text: 'place 1'
-            color: 0, 0, 0, 1
-        Label:
-            text: 'place 2'
-            color: 0, 0, 0, 1
-        Label:
-            text: 'place 3'
-            color: 0, 0, 0, 1
-        Label:
-            text: 'place 4'
-            color: 0, 0, 0, 1
-        Label:
-            text: 'place 5'
-            color: 0, 0, 0, 1
-        Label:
-            text: 'place 6'
-            color: 0, 0, 0, 1
-        Label:
-            text: 'place 7'
-            color: 0, 0, 0, 1
-        Label:
-            text: 'place 8'
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                size_hint: 1, 0.1
+                text: "Battery"
+                color: 0, 0, 0, 1
+            Label:
+                id: Battery
+                text: self.parent.parent.parent.battery
+                background_color: 0.97, 0.27, 0.27, 1
+                color: 0, 0, 0, 1
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                size_hint: 1, 0.1
+                text: "Sensor Status"
+                color: 0, 0, 0, 1
+            Label:
+                id: Sensor
+                text: self.parent.parent.parent.sensor_status
+                background_color: 0.97, 0.27, 0.27, 1
+                color: 0, 0, 0, 1
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                size_hint: 1, 0.1
+                text: "Pump Status"
+                color: 0, 0, 0, 1
+            Label:
+                id: Pump
+                text: self.parent.parent.parent.pump_status
+                background_color: 0.97, 0.27, 0.27, 1
+                color: 0, 0, 0, 1
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                size_hint: 1, 0.1
+                text: "Delivery Status"
+                color: 0, 0, 0, 1
+            Label:
+                id: Delivery
+                text: self.parent.parent.parent.delivery_status
+                background_color: 0.97, 0.27, 0.27, 1
+                color: 0, 0, 0, 1
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                size_hint: 1, 0.1
+                text: "Needle Status"
+                color: 0, 0, 0, 1
+            Label:
+                id: Needle
+                text: self.parent.parent.parent.needle_status
+                background_color: 0.97, 0.27, 0.27, 1
+                color: 0, 0, 0, 1
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                size_hint: 1, 0.1
+                text: "Reservoir Status"
+                color: 0, 0, 0, 1
+            Label:
+                id: Reservoir
+                text: self.parent.parent.parent.reservoir_status
+                background_color: 0.97, 0.27, 0.27, 1
+                color: 0, 0, 0, 1
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                size_hint: 1, 0.1
+                text: "Insulin Level"
+                color: 0, 0, 0, 1
+            Label:
+                id: Insulin
+                text: self.parent.parent.parent.insulin_status
+                background_color: 0.97, 0.27, 0.27, 1
+                color: 0, 0, 0, 1
+        Label
+            id: dispClock
+            text: self.parent.parent.time
             color: 0, 0, 0, 1
     GridLayout:
         rows: 1
