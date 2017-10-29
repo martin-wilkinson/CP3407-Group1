@@ -3,45 +3,74 @@ from time import gmtime, strftime
 
 HIGH = 7
 LOW = 3
-MAX_DOSAGE = 10
+MAX_DAILY_DOSAGE = 10
+MAX_DOSAGE = 3
+DOSE = 1
+
 
 def main():
-    count = 1                                       # This iterates through the data in CSV.
+    count = 1                                                           # This iterates through the data in CSV.
     current = 0
-    reservoirCapacity = 10
+    reservoir = int(reservoirLevel())
+    dailyDosage = 0
     manualMode = False
-    # while manualMode is False:                    # Manual/Auto loop switch
-    for i in range(19):
-        # print("Running startup Checks")
-        checks(count)                               # startup checks
-        if checkReservoir(count):
-            newReservoir = True
-        else:
-            newReservoir = False
-        previous = current
-        current = getLevels(count)
-        print("current=",current, "previous=", previous)
-        rate = getRate(current, previous)
-        if administer(rate, current):
-            if cumlativeDose():
-                reservoirLevel(rate, newReservoir)
-            else:
-                pass # Error for too much dose in a day.
-        count += 1
+    if manualMode is False:                                        # Manual/Auto loop switch
+        for i in range(19):
+            time = strftime("%H:%M:%S", gmtime())
+            # print("Running startup Checks")
+            statusArray = checks(count)                                     # startup checks
+            # print(statusArray)
+            previous = current
+            current = getSugarLevels(count)
+            # print("current=",current, "previous=", previous)
+            rate = getRate(current, previous)
+            if canAdminister(rate, current):
+                message = ("{}: {}").format(time,canAdminister(rate, current)[1])
+                print(message)
+                if rate >= MAX_DOSAGE:
+                    rate = MAX_DOSAGE
+                canDose = cumlativeDose(rate, dailyDosage)[0]
+                # print(canDose)
+                if reservoir >= rate and canDose:
+                    dailyDosage = cumlativeDose(rate, dailyDosage)[1]
+                    message3 = ("{}: Insulin Delivered.").format(time)
+                    print(message3)
+                elif cumlativeDose(rate, dailyDosage) is False:
+                    dailyExceedMessage = ("{}: Daily Dosage exceeded.").format(time)  # Error for too much dose in a day.
+                    print(dailyExceedMessage)
+                elif reservoir < rate:
+                    emptyReservoirMessage = ("{}: Reservoir out of insulin.").format(time)
+                    print(emptyReservoirMessage)
 
-def cumlativeDose(rate):
-    now = strftime("%H:%M:%S", gmtime())
-    if str(now) == "00:00:00":
-        dailyDosage = 0
-    elif (dailyDosage + rate) > MAX_DOSAGE:
-        print("Maximum Daily Insulin will be exceeded")
-        return False
-    elif (dailyDosage + rate) <= MAX_DOSAGE:
-        dailyDosage += rate
+                print(dailyDosage)
+            count += 1
+        while manualMode is True:
+            time = strftime("%H:%M:%S", gmtime())
+            # button code here
+            # within a 5 second window from first press, count the amount of presses to get the dosage.
+            # pass the button count presses to manualAdminister
+            manualDosage = manualAdminister(buttonCount, dailyDosage, time)
+
+
+
+def manualAdminister(buttonCount, dailyDosage, time):               # This is to handle the manual buttons and administer dosage
+    if ((DOSE * buttonCount) + dailyDosage) > MAX_DAILY_DOSAGE or (MAX_DOSAGE + dailyDosage) >MAX_DAILY_DOSAGE:
+        manualDailyExceedMessage = ("{}: Daily Dosage exceeded.").format(time)
+        return manualDailyExceedMessage
+    else:
+        dailyDosage += (DOSE * buttonCount)
         return dailyDosage
 
 
-def getLevels(count):
+def cumlativeDose(rate, dailyDosage):
+    if (dailyDosage + rate) > MAX_DAILY_DOSAGE:
+        return False, dailyDosage
+    elif (dailyDosage + rate) <= MAX_DAILY_DOSAGE:
+        dailyDosage += rate
+        return True, dailyDosage
+
+
+def getSugarLevels(count):
     current = int(getData(count, 6))
     return current
 
@@ -51,46 +80,44 @@ def getRate(current, previous):
     return rate
 
 
-def administer(rate, current):
+def canAdminister(rate, current):
     if rate > 0:
         if current > HIGH:
-            print('Blood Sugar levels high, ', rate, 'delivered.')
-            return True
+            message = 'Blood Sugar levels high'
+            return True, message
         elif LOW <= current <= HIGH:
-            print('Safe')
-            return False
+            message = 'Blood Sugar Safe'
+            return False, message
         elif current < LOW:
-            print("Your Blood Sugar Levels are low!")
-            return True
+            message = "Your Blood Sugar Levels are low!"
+            return True, message
 
     elif rate < 0:
         if current > HIGH:
-            print('Blood Sugar levels high, ', rate, 'delivered.')
+            message = 'Blood Sugar levels high'
+            return True, message
         elif LOW <= current <= HIGH:
-            print('Safe')
+            message = 'Blood Sugar Safe'
+            return False, message
         elif current < LOW:
-            print("Your Blood Sugar Levels are low!")
+            message = "Your Blood Sugar Levels are low!"
+            return True, message
 
     elif rate == 0:
         if current > HIGH:
-            print('Blood Sugar levels high, ', rate, 'delivered.')
+            message = 'Blood Sugar levels high'
+            return True, message
         elif LOW <= current <= HIGH:
-            print('Safe')
+            message = 'Blood Sugar Safe'
+            return False, message
         elif current < LOW:
-            print("Your Blood Sugar Levels are low!")
+            message = "Your Blood Sugar Levels are low!"
+            return True, message
 
 
-def reservoirLevel(rate, newReservoir):
-    print(rate, newReservoir)
-    if newReservoir:
-        level = 10
-    else:
-        level -= rate
-
-    if level <= 0:
-        print("Reservoir is Empty!")
-    else:
-        return level
+def reservoirLevel():
+    level = getData(1, 7)
+    return level
 
 
 def checks(count):
@@ -103,19 +130,12 @@ def checks(count):
     statusArray.extend([sensorStatus, pumpStatus, deliveryStatus, needleStatus, reservoirStatus])
     return statusArray
 
-def checkReservoir(count):
-    print(getData(count, 7))
-    if getData(count, 7) == 'TRUE':
-        return True
-    else:
-        return False
+
+# def checkReservoir(count):
+#     print(getData(count, 7))
+#     if getData(count, 7) == 'TRUE':
+#         return True
+#     else:
+#         return False
 
 main()
-
-"""
-Have calc call admin to administer insulin and take away from total + add to cumulative.
-
-self-test  program  every  30  seconds.
-Check blood sugar every 10mins and deliver insulin if needed
-
-"""
