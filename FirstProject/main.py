@@ -1,6 +1,7 @@
 import time
 from os import listdir
 
+
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.lang import Builder
@@ -8,6 +9,7 @@ from kivy.properties import StringProperty
 from kivy.uix.gridlayout import GridLayout
 
 from InsulinPump import *
+from database import *
 
 kv_path = './kv/'
 for kv in listdir(kv_path):
@@ -27,6 +29,7 @@ MAX_DAILY_DOSAGE = 10
 MAX_DOSAGE = 3
 DOSE = 1
 
+
 class Container(GridLayout):
     manual_mode = StringProperty("FALSE")
     latest_message = StringProperty("No Message")
@@ -43,8 +46,7 @@ class Container(GridLayout):
     reservoir_status = StringProperty("Ok")
     insulin_status = StringProperty("Ok")
 
-
-    def status_update(self,*args):
+    def status_update(self, *args):
         self.sensor_status = "{}".format(self.status_strings[0])
         self.pump_status = "{}".format(self.status_strings[1])
         self.delivery_status = "{}".format(self.status_strings[2])
@@ -178,6 +180,7 @@ class Container(GridLayout):
     def schedule_amode_update(self):
         Clock.schedule_once(self.auto_mode(), 5)
 
+
 class MainApp(App):
     def build(self):
         self.title = 'Awesome app!!!'
@@ -187,6 +190,8 @@ class MainApp(App):
         container.status_update()
         container.schedule_amode_update()
         return container
+
+create_tables()
 
 if __name__ == "__main__":
     MainApp().run()

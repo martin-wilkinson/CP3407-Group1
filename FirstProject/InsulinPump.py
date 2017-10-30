@@ -1,6 +1,7 @@
 from time import gmtime, strftime
 
 from getTestData import *
+from database import *
 
 HIGH = 7
 LOW = 3
@@ -19,7 +20,7 @@ def main():
         for i in range(19):
             time = strftime("%H:%M:%S", gmtime())
             # print("Running startup Checks")
-            statusArray = checks(count)  # startup checks
+            statusArray = get_status_checks(count)  # startup checks
             # print(statusArray)
             previous = current
             current = getSugarLevels(count)
@@ -50,7 +51,7 @@ def main():
             # button code here
             # within a 5 second window from first press, count the amount of presses to get the dosage.
             # pass the button count presses to manualAdminister
-            manualDosage = manualAdminister(buttonCount, dailyDosage, time)
+            # manualDosage = manualAdminister(button_count, dailyDosage, time)
 
 
 def manualAdminister(buttonCount, dailyDosage, time):  # This is to handle the manual buttons and administer dosage
@@ -59,6 +60,7 @@ def manualAdminister(buttonCount, dailyDosage, time):  # This is to handle the m
         return manualDailyExceedMessage
     else:
         dailyDosage += (DOSE * buttonCount)
+        add_to_insulin_history(True, DOSE)
         return dailyDosage
 
 
@@ -67,11 +69,13 @@ def cumlativeDose(rate, dailyDosage):
         return False, dailyDosage
     elif (dailyDosage + rate) <= MAX_DAILY_DOSAGE:
         dailyDosage += rate
+        add_to_insulin_history(False, rate)
         return True, dailyDosage
 
 
 def getSugarLevels(count):
     current = int(getData(count, 6))
+    add_to_blood_sugar_table(current)
     return current
 
 
