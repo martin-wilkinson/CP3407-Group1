@@ -100,12 +100,12 @@
         cols: 2
         Label:
             id: lastDose
-            text: 'Blood Glucose Level'
+            text: self.parent.parent.latest_message_text
             color: 0, 0, 0, 1
             size_hint_x: 0.3
         Label:
             id: bloodSugarLevel
-            text: 'Text Display'
+            text: self.parent.parent.blood_glucose_level
             color: 0, 0, 0, 1
     GridLayout:
         rows: 1

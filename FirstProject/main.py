@@ -30,6 +30,7 @@ DOSE = 1
 class Container(GridLayout):
     manual_mode = StringProperty("FALSE")
     latest_message = StringProperty("No Message")
+    latest_message_text = StringProperty("No message")
     time = StringProperty("00:00")
     blood_glucose_level = StringProperty("0")
     last_dose = StringProperty("1")
@@ -45,15 +46,6 @@ class Container(GridLayout):
 
 
     def status_update(self,*args):
-        self.sensor_status = "{}".format(self.status_strings[0])
-        self.pump_status = "{}".format(self.status_strings[1])
-        self.delivery_status = "{}".format(self.status_strings[2])
-        self.needle_status = "{}".format(self.status_strings[3])
-        self.reservoir_status = "{}".format(self.status_strings[4])
-
-        self.schedule_status_update()
-
-    def schedule_status_update(self):
         global count
         checks = get_status_checks(count)
         ids = [self.ids.Sensor, self.ids.Pump, self.ids.Delivery, self.ids.Needle, self.ids.Reservoir]
@@ -65,6 +57,16 @@ class Container(GridLayout):
             else:
                 self.status_strings[i] = states[0]
                 ids[i].color = (0.28, 0.97, 0.29, 1)
+        self.sensor_status = "{}".format(self.status_strings[0])
+        self.pump_status = "{}".format(self.status_strings[1])
+        self.delivery_status = "{}".format(self.status_strings[2])
+        self.needle_status = "{}".format(self.status_strings[3])
+        self.reservoir_status = "{}".format(self.status_strings[4])
+
+        self.schedule_status_update()
+
+    def schedule_status_update(self):
+
         Clock.schedule_once(self.status_update, 5)
 
     def buttonPress(self):
@@ -97,6 +99,8 @@ class Container(GridLayout):
         if self.manual_mode == "TRUE":
             if current_time - last_time > 5:
                 manualDosage = manualAdminister(button_count, daily_dosage, current_time)
+                message3 = "{}: {} Doses delivered.".format(self.time, button_count)
+                self.update_message_box(message3)
         else:
             pass
         last_time = current_time
@@ -114,9 +118,7 @@ class Container(GridLayout):
         Clock.schedule_once(self.update, secs_to_next_minute)
 
     def battery_update(self, *args):
-
         self.battery = "{}%".format(self.battery_int)
-
         self.schedule_battery_update()
 
     # Simulates slow drain of battery
@@ -130,7 +132,7 @@ class Container(GridLayout):
             self.ids.Battery.color = (0.95, 0.95, 0.13, 1)
         else:
             self.ids.Battery.color = (0.97, 0.27, 0.27, 1)
-        Clock.schedule_once(self.battery_update, 600)
+        Clock.schedule_once(self.battery_update, 20)
 
     # Print message making sure that messages are not present for less than 5 seconds to ensure readability
     def update_message_box(self, message):
@@ -139,44 +141,52 @@ class Container(GridLayout):
             pass
         self.latest_message = message
 
+    def update_text_box(self, message):
+        global message_applied_time
+        while (time.time() - message_applied_time) < 5:
+            pass
+        self.latest_message_text = message
+
     # Automatic Functionality
-    def auto_mode(self):
+    def auto_mode(self, *args):
         global count  # This iterates through the data in CSV.
         global current
         global daily_dosage
         global reservoir
         previous = current
         current = getSugarLevels(count)
+        self.blood_glucose_level = "Blood Glucose Level:  {}".format(current)
         rate = getRate(current, previous)
         can_administer = canAdminister(rate, current)
         if can_administer[0] is True:
-            message = "{}: {}".format(time, canAdminister(rate, current)[1])
-            self.update_message_box(message)
+            message = "{}: {}".format(self.time, can_administer[1])
+            self.update_text_box(message)
             if rate >= MAX_DOSAGE:
                 rate = MAX_DOSAGE
             canDose = cumlativeDose(rate, daily_dosage)[0]
             if reservoir >= rate and canDose:
                 daily_dosage = cumlativeDose(rate, daily_dosage)[1]
-                message3 = "{}: Insulin Delivered.".format(time)
+                message3 = "{}: Insulin Delivered.".format(self.time)
                 self.update_message_box(message3)
             elif cumlativeDose(rate, daily_dosage) is False:
-                dailyExceedMessage = "{}: Daily Dosage exceeded.".format(time)
+                dailyExceedMessage = "{}: Daily Dosage exceeded.".format(self.time)
                 self.update_message_box(dailyExceedMessage)
             elif reservoir < rate:
-                emptyReservoirMessage = "{}: Reservoir out of insulin.".format(time)
+                emptyReservoirMessage = "{}: Reservoir out of insulin.".format(self.time)
                 self.update_message_box(emptyReservoirMessage)
                 self.last_dose = daily_dosage
         else:
-            self.update_message_box(can_administer[1])
+            self.update_text_box(can_administer[1])
 
         if count == 19:
             count = 1
         else:
             count += 1
-        self.schedule_amode_update()
+        self.schedule_auto_update()
 
-    def schedule_amode_update(self):
-        Clock.schedule_once(self.auto_mode(), 5)
+    def schedule_auto_update(self):
+        Clock.schedule_once(self.auto_mode, 10)
+
 
 class MainApp(App):
     def build(self):
@@ -185,7 +195,7 @@ class MainApp(App):
         container.update()
         container.battery_update()
         container.status_update()
-        container.schedule_amode_update()
+        container.auto_mode()
         return container
 
 if __name__ == "__main__":
