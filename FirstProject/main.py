@@ -1,27 +1,38 @@
-from kivy.app import App
-from random import *
-from kivy.app import Widget
-from kivy.properties import StringProperty
-from kivy.properties import NumericProperty
-from kivy.uix.label import Label
-from kivy.uix.gridlayout import GridLayout
-from kivy.lang import Builder
-from kivy.clock import Clock
-
 import time
-
-
 from os import listdir
+
+from kivy.app import App
+from kivy.clock import Clock
+from kivy.lang import Builder
+from kivy.properties import StringProperty
+from kivy.uix.gridlayout import GridLayout
+
+from InsulinPump import *
+
 kv_path = './kv/'
 for kv in listdir(kv_path):
     Builder.load_file(kv_path+kv)
 
 colorIterator = 0
-
+button_count = 0
+current = 0
+count = 1
+reservoir = int(reservoirLevel())
+message_applied_time = time.time()
+last_time = 0
+daily_dosage = 0
+HIGH = 7
+LOW = 3
+MAX_DAILY_DOSAGE = 10
+MAX_DOSAGE = 3
+DOSE = 1
 
 class Container(GridLayout):
-
+    manual_mode = StringProperty("FALSE")
+    latest_message = StringProperty("No Message")
     time = StringProperty("00:00")
+    blood_glucose_level = StringProperty("0")
+    last_dose = StringProperty("1")
     battery_int = 99
     battery = StringProperty("99%")
     sensor_status = StringProperty("Ok")
@@ -31,6 +42,7 @@ class Container(GridLayout):
     needle_status = StringProperty("Ok")
     reservoir_status = StringProperty("Ok")
     insulin_status = StringProperty("Ok")
+
 
     def status_update(self,*args):
         self.sensor_status = "{}".format(self.status_strings[0])
@@ -42,7 +54,8 @@ class Container(GridLayout):
         self.schedule_status_update()
 
     def schedule_status_update(self):
-        checks = ['TRUE', 'TRUE', 'FALSE', 'TRUE', 'FALSE']
+        global count
+        checks = get_status_checks(count)
         ids = [self.ids.Sensor, self.ids.Pump, self.ids.Delivery, self.ids.Needle, self.ids.Reservoir]
         states = ["OK", "FAIL"]
         for i in range(0, 5):
@@ -52,18 +65,41 @@ class Container(GridLayout):
             else:
                 self.status_strings[i] = states[0]
                 ids[i].color = (0.28, 0.97, 0.29, 1)
-        Clock.schedule_once(self.status_update, 30)
+        Clock.schedule_once(self.status_update, 5)
 
     def buttonPress(self):
         global colorIterator
+        global button_count
+        global last_time
         if colorIterator == 0:
             self.ids.manualButton.background_color = (0.28, 0.97, 0.29, 1)
             self.ids.manualButton.text = "ON"
+            self.ids.doseButton.background_color = (0.28, 0.97, 0.29, 1)
+            self.ids.doseButton.text = "DOSE"
+            self.manual_mode = "TRUE"
+            button_count = 0
+            last_time = 0
             colorIterator = 1
         else:
             self.ids.manualButton.background_color = (0.97, 0.27, 0.27, 1)
             self.ids.manualButton.text = "OFF"
+            self.manual_mode = "FALSE"
+            self.ids.doseButton.text = "DISABLED"
+            self.ids.doseButton.background_color = 0.65, 0.60, 0.60, 1
             colorIterator = 0
+
+    def add_dose(self):
+        global button_count
+        global last_time
+        global daily_dosage
+        current_time = time.time()
+        button_count += 1
+        if self.manual_mode == "TRUE":
+            if current_time - last_time > 5:
+                manualDosage = manualAdminister(button_count, daily_dosage, current_time)
+        else:
+            pass
+        last_time = current_time
 
     def update(self, *args):
         self.time = time.strftime("%H : %M")
@@ -83,6 +119,7 @@ class Container(GridLayout):
 
         self.schedule_battery_update()
 
+    # Simulates slow drain of battery
     def schedule_battery_update(self):
         if self.battery_int > 9:
             self.battery_int = self.battery_int - 10
@@ -95,32 +132,51 @@ class Container(GridLayout):
             self.ids.Battery.color = (0.97, 0.27, 0.27, 1)
         Clock.schedule_once(self.battery_update, 600)
 
-    #def sensor_update(self, *args):
+    # Print message making sure that messages are not present for less than 5 seconds to ensure readability
+    def update_message_box(self, message):
+        global message_applied_time
+        while (time.time() - message_applied_time) < 5:
+            pass
+        self.latest_message = message
 
+    # Automatic Functionality
+    def auto_mode(self):
+        global count  # This iterates through the data in CSV.
+        global current
+        global daily_dosage
+        global reservoir
+        previous = current
+        current = getSugarLevels(count)
+        rate = getRate(current, previous)
+        can_administer = canAdminister(rate, current)
+        if can_administer[0] is True:
+            message = "{}: {}".format(time, canAdminister(rate, current)[1])
+            self.update_message_box(message)
+            if rate >= MAX_DOSAGE:
+                rate = MAX_DOSAGE
+            canDose = cumlativeDose(rate, daily_dosage)[0]
+            if reservoir >= rate and canDose:
+                daily_dosage = cumlativeDose(rate, daily_dosage)[1]
+                message3 = "{}: Insulin Delivered.".format(time)
+                self.update_message_box(message3)
+            elif cumlativeDose(rate, daily_dosage) is False:
+                dailyExceedMessage = "{}: Daily Dosage exceeded.".format(time)
+                self.update_message_box(dailyExceedMessage)
+            elif reservoir < rate:
+                emptyReservoirMessage = "{}: Reservoir out of insulin.".format(time)
+                self.update_message_box(emptyReservoirMessage)
+                self.last_dose = daily_dosage
+        else:
+            self.update_message_box(can_administer[1])
 
-    #def schedule_sensor_update(self):
+        if count == 19:
+            count = 1
+        else:
+            count += 1
+        self.schedule_amode_update()
 
-
-    #def pump_update(self, *args):
-
-    #def schedule_pump_update(self):
-
-    ##def delivery_update(self, *args):
-
-    #def schedule_delivery_update(self):
-
-    #def needle_update(self, *args):
-
-    #def schedule_needle_update(self):
-
-    #def reservoir_update(self, *args):
-
-    #def schedule_reservoir_update(self):
-
-    #def insulin_update(self, *args):
-
-    #def schedule_insulin_update(self):
-
+    def schedule_amode_update(self):
+        Clock.schedule_once(self.auto_mode(), 5)
 
 class MainApp(App):
     def build(self):
@@ -129,6 +185,7 @@ class MainApp(App):
         container.update()
         container.battery_update()
         container.status_update()
+        container.schedule_amode_update()
         return container
 
 if __name__ == "__main__":
