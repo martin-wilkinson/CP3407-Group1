@@ -99,12 +99,12 @@
         rows: 1
         cols: 2
         Label:
-            id: L1
+            id: lastDose
             text: 'Blood Glucose Level'
             color: 0, 0, 0, 1
             size_hint_x: 0.3
         Label:
-            id: b1
+            id: bloodSugarLevel
             text: 'Text Display'
             color: 0, 0, 0, 1
     GridLayout:
@@ -127,10 +127,25 @@
                 background_color: 0.97, 0.27, 0.27, 1
                 color: 1, 1, 1, 1
                 on_release: root.buttonPress()
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                size_hint: 1, 0.3
+                text: 'Add Dose'
+                background_color: 0, 0, 0, 1
+                color: 0, 0, 0, 1
+                canvas.before:
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+            Button:
+                id: doseButton
+                text: 'DISABLED'
+                background_color: 0.65, 0.60, 0.60, 1
+                color: 1, 1, 1, 1
+                on_release: root.add_dose()
         Label:
-            text: 'PLace 9'
-            color: 0, 0, 0, 1
-        Label:
-            text: 'Status etc.'
+            id: messageBox
+            text: self.parent.parent.latest_message
             color: 0, 0, 0, 1
 
