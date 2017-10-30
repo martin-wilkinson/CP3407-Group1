@@ -76,25 +76,25 @@ def add_to_insulin_history(insulin_state, insulin_units):
 #     return patient_data
 
 
-def pull_from_blood_sugar_table():
-
-    conn = sqlite3.connect('medical.db')
-    c = conn.cursor()
-
-    c.execute('SELECT blood_sugar_recorded_time FROM blood_sugar_history')
-    blood_sugar_data = c.fetchmany(3)
-    conn.commit()
-    conn.close()
-    return blood_sugar_data
-
-
-def pull_from_insulin_history():
-
-    conn = sqlite3.connect('medical.db')
-    c = conn.cursor()
-
-    c.execute('SELECT insulin_recorded_time FROM insulin_history')
-    insulin_data = c.fetchmany(3)
-    conn.commit()
-    conn.close()
-    return insulin_data
+# def pull_from_blood_sugar_table():
+#
+#     conn = sqlite3.connect('medical.db')
+#     c = conn.cursor()
+#
+#     c.execute('SELECT blood_sugar_recorded_time FROM blood_sugar_history')
+#     blood_sugar_data = c.fetchmany(3)
+#     conn.commit()
+#     conn.close()
+#     return blood_sugar_data
+#
+#
+# def pull_from_insulin_history():
+#
+#     conn = sqlite3.connect('medical.db')
+#     c = conn.cursor()
+#
+#     c.execute('SELECT insulin_recorded_time FROM insulin_history')
+#     insulin_data = c.fetchmany(3)
+#     conn.commit()
+#     conn.close()
+#     return insulin_data
